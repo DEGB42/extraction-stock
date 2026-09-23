@@ -1,0 +1,47 @@
+### Create product
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Salty Caramel",
+    "category_id": 1,
+    "stock": 3,
+    "stock_unit": "BOTTLE"
+}
+
+### Create invalid product
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Producto raro",
+    "category_id": 1,
+    "stock": 3,
+    "stock_unit": "PATATA"
+}
+
+### Create Negative Number
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Producto negativo",
+    "category_id": 1,
+    "stock": -5,
+    "stock_unit": "BOTTLE"
+}
+
+### Create Category ID violation PG
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Producto categoria fantasma",
+    "category_id": 999999,
+    "stock": 1,
+    "stock_unit": "BOTTLE"
+}
