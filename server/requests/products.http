@@ -4,10 +4,12 @@ POST http://localhost:3000/products
 Content-Type: application/json
 
 {
-    "name": "Salty Caramel",
-    "category_id": 1,
-    "stock": 3,
-    "stock_unit": "BOTTLE"
+    "name": "Test Matcha Package",
+    "category_id": 5,
+    "stock": 2,
+    "stock_unit": "BAG",
+    "package_quantity": 1,
+    "package_unit": "KG"
 }
 
 ### Create invalid product
@@ -44,4 +46,30 @@ Content-Type: application/json
     "category_id": 999999,
     "stock": 1,
     "stock_unit": "BOTTLE"
+}
+
+### Create package unit error
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Test Package",
+    "category_id": 1,
+    "stock": 3,
+    "stock_unit": "BOTTLE",
+    "package_quantity": 1,
+    "package_unit": "PATATA"
+}
+
+### Stock unit error
+
+POST http://localhost:3000/products
+Content-Type: application/json
+
+{
+    "name": "Test Package",
+    "category_id": 1,
+    "stock": 3,
+    "stock_unit": "Lata"
 }
