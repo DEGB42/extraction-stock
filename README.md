@@ -37,15 +37,18 @@ Currently implemented:
 ```text
 server/
 └── src/
-    ├── index.ts
-    ├── db.ts
-    ├── routes/
-    │   └── products.routes.ts
     ├── controllers/
     │   └── products.controller.ts
-    └── services/
-        └── products.service.ts
-```
+    ├── routes/
+    │   └── products.routes.ts
+    ├── services/
+    │   └── products.service.ts
+    ├── types/
+    │   └── products.types.ts
+    ├── validators/
+    │   └── products.validator.ts
+    ├── db.ts
+    └── index.ts
 
 The backend follows a simple layered architecture:
 
@@ -121,6 +124,47 @@ can match:
 Vanilla
 ```
 
+### Create a product
+
+```http
+POST /products
+
+Example request body:
+
+{
+  "name": "Matcha",
+  "category_id": 5,
+  "stock": 2,
+  "stock_unit": "BAG",
+  "package_quantity": 1,
+  "package_unit": "KG"
+}
+
+Example Response:
+
+{
+  "id": 1,
+  "name": "Matcha",
+  "category_id": 5,
+  "stock": 2,
+  "stock_unit": "BAG",
+  "package_quantity": 1,
+  "package_unit": "KG",
+  "created_at": "2026-09-24T10:00:00.000Z",
+  "updated_at": "2026-09-24T10:00:00.000Z"
+}
+
+The endpoint validates product data before inserting it into the database.
+Validation includes:
+- Product name must be a non-empty string
+- Category ID must be a positive integer
+- Stock must be a non-negative integer
+- Stock unit must be valid
+- Package quantity must be a positive number when provided
+- Package unit must be valid
+- Package quantity and package unit must be provided together
+- Category must exist
+
 ## Database
 
 The application currently uses the following main entities:
@@ -185,19 +229,26 @@ http://localhost:3000
 
 ## Roadmap
 
-Planned features include:
+### Completed
 
-- Create and edit products
-- Update current stock
+- List products
+- Get product by ID
+- Search products by name
+- Create products
+- Product input validation
+
+### Next
+
+- Edit products
+- Update stock
 - Track stock movements
-- Out-of-stock product detection
-- Category-based product browsing
-- Order creation
-- Order status management
-- Receiving orders and updating stock
+- Show out-of-stock products
+- Browse products by category
+- Create and manage orders
+- Receive orders
 - Order history
 - Automatic order message generation
-- Desktop user interface
+- Desktop interface
 
 ## Project Status
 
