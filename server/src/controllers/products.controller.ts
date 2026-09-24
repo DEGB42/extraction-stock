@@ -7,6 +7,7 @@ import {
 } from "../services/products.service.js";
 import { DatabaseError } from "pg";
 import { validateCreateProduct } from "../validators/products.validator.js";
+import { CreateProductInput } from "../types/products.types.js";
 
 export async function getProducts(req: Request, res: Response) {
   try {
@@ -77,14 +78,16 @@ export async function createProduct(req: Request, res: Response) {
       package_unit,
     } = req.body;
 
-    const product = await createProductService({
+    const productData: CreateProductInput = {
       name,
       category_id,
       stock,
       stock_unit,
       package_quantity,
       package_unit,
-    });
+    };
+
+    const product = await createProductService(productData);
 
     res.status(201).json(product);
   } catch (error) {

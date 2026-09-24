@@ -1,13 +1,5 @@
 import { pool } from "../db.js";
-
-interface CreateProductInput {
-  name: string;
-  category_id: number;
-  stock?: number;
-  stock_unit: "BOX" | "BAG" | "BOTTLE" | "UNIT";
-  package_quantity?: number | null;
-  package_unit?: "KG" | "G" | "L" | "ML" | "UNIT" | null;
-}
+import type { CreateProductInput } from "../types/products.types.js";
 
 export async function getAllProducts() {
   const result = await pool.query(`
