@@ -2,7 +2,7 @@
 
 A coffee shop inventory management application designed to track product stock and simplify the ordering process.
 
-Extraction Stock aims to provide a centralized way to manage inventory, find products quickly, track stock levels, and eventually simplify the process of preparing and managing supplier orders.
+Extraction Stock aims to provide a centralized way to manage inventory, find products quickly, track stock levels and stock movements, and eventually simplify the process of preparing and managing supplier orders.
 
 ## Features
 
@@ -11,8 +11,13 @@ Currently implemented:
 - List all products
 - Get a product by ID
 - Search products by name
+- Create products
+- Product input validation
 - Product categories
-- Product stock tracking
+- Current stock tracking
+- Manual stock updates
+- Stock movement history
+- Transactional stock updates
 - PostgreSQL database integration
 - REST API built with Express and TypeScript
 
@@ -49,6 +54,7 @@ server/
     │   └── products.validator.ts
     ├── db.ts
     └── index.ts
+```
 
 The backend follows a simple layered architecture:
 
@@ -59,15 +65,18 @@ Route
    ↓
 Controller
    ↓
+Validation
+   ↓
 Service
    ↓
 PostgreSQL
 ```
 
-- **Routes** define the API endpoints and direct requests to the appropriate controller.
-- **Controllers** handle HTTP requests, validation, responses, and HTTP errors.
-- **Services** contain data-access logic and communicate with PostgreSQL.
-- **db.ts** configures the PostgreSQL connection pool.
+- Routes define API endpoints and direct requests to the appropriate controller.
+- Controllers handle HTTP requests, responses, validation flow, and HTTP errors.
+- Validators check incoming request data before it reaches the database layer.
+- Services contain application and data-access logic and communicate with PostgreSQL.
+- `db.ts` configures the PostgreSQL connection pool.
 
 ## API
 
@@ -78,6 +87,8 @@ GET /products
 ```
 
 Returns all products currently stored in the database.
+
+---
 
 ### Get product by ID
 
@@ -97,6 +108,8 @@ Possible responses:
 - `400` — Invalid product ID
 - `404` — Product not found
 - `500` — Internal server error
+
+---
 
 ### Search products
 
@@ -124,13 +137,17 @@ can match:
 Vanilla
 ```
 
+---
+
 ### Create a product
 
 ```http
 POST /products
+```
 
 Example request body:
 
+```json
 {
   "name": "Matcha",
   "category_id": 5,
@@ -139,9 +156,11 @@ Example request body:
   "package_quantity": 1,
   "package_unit": "KG"
 }
+```
 
-Example Response:
+Example response:
 
+```json
 {
   "id": 1,
   "name": "Matcha",
@@ -153,9 +172,12 @@ Example Response:
   "created_at": "2026-09-24T10:00:00.000Z",
   "updated_at": "2026-09-24T10:00:00.000Z"
 }
+```
 
-The endpoint validates product data before inserting it into the database.
+Product data is validated before being inserted into the database.
+
 Validation includes:
+
 - Product name must be a non-empty string
 - Category ID must be a positive integer
 - Stock must be a non-negative integer
@@ -164,6 +186,68 @@ Validation includes:
 - Package unit must be valid
 - Package quantity and package unit must be provided together
 - Category must exist
+
+---
+
+### Update product stock
+
+```http
+PATCH /products/:id/stock
+```
+
+Example:
+
+```http
+PATCH /products/1/stock
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+  "stock": 5
+}
+```
+
+The endpoint sets the product's current stock to the provided value.
+
+The operation is performed inside a PostgreSQL transaction:
+
+```text
+BEGIN
+  ↓
+SELECT current stock
+FOR UPDATE
+  ↓
+Calculate stock change
+  ↓
+UPDATE product
+  ↓
+INSERT stock movement
+  ↓
+COMMIT
+```
+
+The selected product row is locked with `FOR UPDATE` while the transaction is running. This prevents concurrent stock updates from producing inconsistent stock movement history.
+
+If any operation fails, the transaction is rolled back.
+
+Each successful manual stock update creates an `ADJUSTMENT` entry in `stock_movements` containing:
+
+- Previous stock
+- New stock
+- Quantity change
+- Product ID
+- Movement type
+- Creation timestamp
+
+Possible responses:
+
+- `200` — Stock updated successfully
+- `400` — Invalid product ID or stock value
+- `404` — Product not found
+- `500` — Internal server error
 
 ## Database
 
@@ -188,13 +272,25 @@ The database is designed to support:
 - Received quantities
 - Stock movement history
 
-PostgreSQL constraints are used to help maintain data integrity.
+Stock movements provide an audit trail of inventory changes.
+
+For manual adjustments, a movement stores:
+
+```text
+previous_stock
+      ↓
+quantity_change
+      ↓
+new_stock
+```
+
+The database uses PostgreSQL constraints to help maintain data integrity.
 
 ## Environment Variables
 
 Database credentials are stored using environment variables.
 
-Create a `.env` file inside the server directory:
+Create a `.env` file inside the `server` directory:
 
 ```env
 DB_USER=
@@ -236,16 +332,20 @@ http://localhost:3000
 - Search products by name
 - Create products
 - Product input validation
+- Update current stock
+- Record manual stock movements
+- Transactional stock updates
+- Row locking for concurrent stock updates
 
 ### Next
 
-- Edit products
-- Update stock
-- Track stock movements
+- Expose stock movement history through the API
 - Show out-of-stock products
 - Browse products by category
+- Edit product information
 - Create and manage orders
 - Receive orders
+- Automatically update stock when orders are received
 - Order history
 - Automatic order message generation
 - Desktop interface
@@ -254,4 +354,6 @@ http://localhost:3000
 
 Extraction Stock is currently under active development.
 
-The project is being built incrementally, with an initial focus on the backend API, database design, and inventory management logic before developing the frontend.
+The project is being built incrementally, with an initial focus on the backend API, database design, inventory integrity, and stock management before developing the frontend.
+
+The current development phase focuses on completing the inventory system and exposing stock movement history before moving on to order management.
