@@ -4,6 +4,7 @@ import {
   getProductById as getProductByIdService,
   searchProducts,
   createProduct as createProductService,
+  updateProductStockService,
 } from "../services/products.service.js";
 import { DatabaseError } from "pg";
 import { validateCreateProduct } from "../validators/products.validator.js";
@@ -25,6 +26,44 @@ export async function getProducts(req: Request, res: Response) {
 
     res.status(500).json({
       error: "Failed to get products",
+    });
+  }
+}
+
+export async function updateProductStock(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const { stock } = req.body;
+
+    if (Number.isNaN(id) || !Number.isInteger(id) || id <= 0) {
+      res.status(400).json({
+        error: "Invalid product id.",
+      });
+      return;
+    }
+
+    if (typeof stock !== "number" || !Number.isInteger(stock) || stock < 0) {
+      res.status(400).json({
+        error: "Stock must be a non-negative integer.",
+      });
+      return;
+    }
+
+    const product = await updateProductStockService(id, stock);
+
+    if (!product) {
+      res.status(404).json({
+        error: "Product not found",
+      });
+      return;
+    }
+
+    res.status(200).json(product);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Failed to update product stock",
     });
   }
 }

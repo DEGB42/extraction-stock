@@ -73,3 +73,12 @@ Content-Type: application/json
     "stock": 3,
     "stock_unit": "Lata"
 }
+
+### UPDATE stock with id 1
+
+PATCH http://localhost:3000/products/1/stock
+Content-Type: application/json
+
+{
+  "stock": 0
+}

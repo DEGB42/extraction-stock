@@ -88,3 +88,64 @@ export async function createProduct(product: CreateProductInput) {
 
   return result.rows[0];
 }
+
+export async function updateProductStockService(id: number, newStock: number) {
+  const client = await pool.connect();
+
+  try {
+    await client.query("BEGIN");
+
+    const result = await client.query(
+      `
+        SELECT stock
+        FROM products
+        WHERE id = $1
+        FOR UPDATE;
+      `,
+      [id],
+    );
+
+    if (!result.rows[0]) {
+      await client.query("ROLLBACK");
+      return undefined;
+    }
+
+    const previousStock = result.rows[0].stock;
+    const quantityChange = newStock - previousStock;
+
+    const updatedProductResult = await client.query(
+      `
+    UPDATE products
+    SET stock = $1,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE id = $2
+    RETURNING *;
+  `,
+      [newStock, id],
+    );
+
+    await client.query(
+      `
+    INSERT INTO stock_movements (
+      product_id,
+      order_id,
+      type,
+      quantity_change,
+      previous_stock,
+      new_stock
+    )
+    VALUES ($1, $2, $3, $4, $5, $6);
+  `,
+      [id, null, "ADJUSTMENT", quantityChange, previousStock, newStock],
+    );
+
+    await client.query("COMMIT");
+
+    return updatedProductResult.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}

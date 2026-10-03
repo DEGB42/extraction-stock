@@ -1,3 +1,5 @@
+import type { CreateProductInput } from "../types/products.types";
+
 export function validateCreateProduct(body: unknown): string | null {
   const stockUnits = ["BOX", "BAG", "BOTTLE", "UNIT"];
   const packageUnits = ["KG", "G", "L", "ML", "UNIT"];
