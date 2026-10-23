@@ -149,3 +149,17 @@ export async function updateProductStockService(id: number, newStock: number) {
     client.release();
   }
 }
+
+export async function getProductMovementsService(id: number) {
+  const result = await pool.query(
+    `
+        SELECT *
+        FROM stock_movements
+        WHERE product_id = $1
+        ORDER BY created_at DESC;
+      `,
+    [id],
+  );
+
+  return result.rows;
+}
