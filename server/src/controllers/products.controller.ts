@@ -5,6 +5,7 @@ import {
   searchProducts,
   createProduct as createProductService,
   updateProductStockService,
+  getProductMovementsService,
 } from "../services/products.service.js";
 import { DatabaseError } from "pg";
 import { validateCreateProduct } from "../validators/products.validator.js";
@@ -142,6 +143,37 @@ export async function createProduct(req: Request, res: Response) {
 
     res.status(500).json({
       error: "Failed to create product",
+    });
+  }
+}
+
+export async function getProductMovements(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      res.status(400).json({
+        error: "Product id must be a positive integer.",
+      });
+      return;
+    }
+
+    const product = await getProductByIdService(id);
+    if (!product) {
+      res.status(404).json({
+        error: "Product not found",
+      });
+
+      return;
+    }
+
+    const movements = await getProductMovementsService(id);
+    res.status(200).json(movements);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Failed to get products movements",
     });
   }
 }
