@@ -82,3 +82,20 @@ Content-Type: application/json
 {
   "stock": 0
 }
+
+### Get Movements stocks
+
+GET http://localhost:3000/products/1/movements
+Content-Type: application/json
+
+### Movements 404 not found
+
+GET http://localhost:3000/products/99999/movements
+
+### Movements Invalid ID
+
+GET http://localhost:3000/products/abc/movements
+
+### Movements Empty movements
+
+GET http://localhost:3000/products/13/movements
