@@ -59,7 +59,7 @@ Content-Type: application/json
     "stock": 3,
     "stock_unit": "BOTTLE",
     "package_quantity": 1,
-    "package_unit": "PATATA"
+    "package_unit": "PIPO PIPO PI PI"
 }
 
 ### Stock unit error
@@ -99,3 +99,25 @@ GET http://localhost:3000/products/abc/movements
 ### Movements Empty movements
 
 GET http://localhost:3000/products/13/movements
+
+### out-of-stock 200 request
+
+GET http://localhost:3000/products/out-of-stock
+
+### Integration test out-of-stock
+
+PATCH http://localhost:3000/products/1/stock
+Content-Type: application/json
+
+{
+  "stock": 2
+}
+
+### Integration test out-of-stock
+
+PATCH http://localhost:3000/products/1/stock
+Content-Type: application/json
+
+{
+  "stock": 0
+}
