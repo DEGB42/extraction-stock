@@ -6,6 +6,7 @@ import {
   createProduct as createProductService,
   updateProductStockService,
   getProductMovementsService,
+  getOutOfStockProductsService,
 } from "../services/products.service.js";
 import { DatabaseError } from "pg";
 import { validateCreateProduct } from "../validators/products.validator.js";
@@ -174,6 +175,19 @@ export async function getProductMovements(req: Request, res: Response) {
 
     res.status(500).json({
       error: "Failed to get products movements",
+    });
+  }
+}
+
+export async function getOutOfStockProducts(req: Request, res: Response) {
+  try {
+    const products = await getOutOfStockProductsService();
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: "Failed to get products out of stock.",
     });
   }
 }

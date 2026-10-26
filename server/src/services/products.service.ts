@@ -163,3 +163,20 @@ export async function getProductMovementsService(id: number) {
 
   return result.rows;
 }
+
+export async function getOutOfStockProductsService() {
+  const results = await pool.query(`
+    SELECT
+    products.id,
+    products.name,
+    categories.name AS category,
+    products.stock,
+    products.stock_unit
+    FROM products
+    JOIN categories
+      ON categories.id = products.category_id
+    WHERE products.stock = 0;
+    `);
+
+  return results.rows;
+}
